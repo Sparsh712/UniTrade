@@ -701,6 +701,7 @@ export default function App() {
                 {featuredListing ? (
                   <div className="featured-card">
                     <div className="featured-thumb">
+                      <div className="featured-label">Latest</div>
                       {isPhoto(featuredListing.image) ? (
                         <img src={featuredListing.image} alt={featuredListing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
@@ -708,7 +709,6 @@ export default function App() {
                       )}
                     </div>
                     <div className="featured-body">
-                      <div className="featured-label">Latest Listing</div>
                       <div className="featured-title">{featuredListing.title}</div>
                       <span className="featured-price">{featuredListing.price} <span style={{ fontSize: 16, color: "var(--gold-muted)" }}>ALGO</span></span>
                       <hr className="featured-hr" />
@@ -745,7 +745,7 @@ export default function App() {
             {/* Condition filter */}
             <div className="cond-row" style={{ height: "auto", minHeight: 48, padding: "12px 48px", background: "rgba(15, 23, 42, 0.3)", borderBottom: "1px solid rgba(255, 255, 255, 0.05)" }}>
               <span className="cond-label" style={{ color: "var(--text-muted)", fontSize: 11, fontWeight: 600 }}>Condition:</span>
-              <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none" }}>
+              <div style={{ display: "flex", gap: 10, overflowX: "auto", scrollbarWidth: "none" }}>
                 {CONDITIONS.map(item => (
                   <motion.button
                     key={item}
@@ -754,7 +754,7 @@ export default function App() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     style={{ 
-                        height: 36, padding: "0 16px", borderRadius: 18, 
+                        height: 36, margin:"2px", padding: "0 16px", borderRadius: 18, 
                         background: condFilter === item ? "var(--pulse)" : "rgba(255,255,255,0.05)",
                         color: condFilter === item ? "#000" : "var(--text-muted)",
                         fontSize: 11, fontWeight: 600, border: "none"
@@ -787,7 +787,7 @@ export default function App() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     style={{ 
-                        height: 36, padding: "0 16px", borderRadius: 18, 
+                        height: 36, margin:"1px", padding: "0 16px", borderRadius: 18, 
                         background: category === item ? "rgba(0, 242, 254, 0.15)" : "transparent",
                         color: category === item ? "var(--pulse)" : "var(--text-muted)",
                         fontSize: 12, fontWeight: 600, border: "none"
