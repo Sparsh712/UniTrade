@@ -93,7 +93,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                 </div>
 
                 {order.txId && (
-                    <a href={`https://testnet.algoexplorer.io/tx/${order.txId}`} target="_blank" rel="noreferrer"
+                    <a href={`https://lora.algokit.io/testnet/transaction/${order.txId}`} target="_blank" rel="noreferrer"
                         className="btn-text-gold"
                         style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", textDecoration: "none", marginTop: 8, display: "inline-block" }}>
                         VIEW TX: {truncate(order.txId)} ↗
