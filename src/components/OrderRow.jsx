@@ -19,6 +19,10 @@ function formatExpiry(isoValue) {
     return new Date(ms).toLocaleString().toUpperCase();
 }
 
+function isPhoto(value) {
+    return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
+}
+
 export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, onRegenerateOtp, onReleasePayment, onCancelOrder, actionLoading, onViewReceipt }) {
     const [otpInput, setOtpInput] = useState("");
     const [otpMessage, setOtpMessage] = useState("");
@@ -68,7 +72,13 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
             alignItems: "start", 
             animation: "fadeIn .3s ease" 
         }}>
-            <div style={{ fontSize: 40, background: "var(--s0)", padding: "12px 16px", border: "1px solid var(--border)" }}>{order.image}</div>
+            <div style={{ background: "var(--s0)", border: "1px solid var(--border)", width: 72, height: 72, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {isPhoto(order.image) ? (
+                    <img src={order.image} alt={order.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                    <span style={{ fontSize: 40, padding: "12px 16px" }}>{order.image}</span>
+                )}
+            </div>
             
             <div>
                 <div className="serif" style={{ fontWeight: 800, color: "var(--text)", fontSize: 18, letterSpacing: "-0.01em" }}>{order.title.toUpperCase()}</div>
@@ -78,13 +88,11 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                     {order.pickupLocation && <div>PICKUP: {order.pickupLocation.toUpperCase()}</div>}
                     {order.negotiatedPrice > 0 && <div style={{ color: "var(--gold)" }}>NEGOTIATED: {order.negotiatedPrice} ALGO</div>}
                     <div>
-                        LEDGER STATUS: <span style={{ color: "var(--text-muted)" }}>{order.paymentMethod === "cash"
-                            ? (order.paymentStatus === "released" ? "CASH HANDOVER COMPLETE" : "CASH HANDOVER PENDING")
-                            : (order.paymentStatus === "released" ? "PAYMENT RELEASED" : "PAYMENT HELD ON-CHAIN")}</span>
+                        LEDGER STATUS: <span style={{ color: "var(--text-muted)" }}>{order.paymentStatus === "released" ? "PAYMENT RELEASED" : "PAYMENT HELD ON-CHAIN"}</span>
                     </div>
                 </div>
 
-                {order.txId && order.txId !== "CASH" && (
+                {order.txId && (
                     <a href={`https://testnet.algoexplorer.io/tx/${order.txId}`} target="_blank" rel="noreferrer"
                         className="btn-text-gold"
                         style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", textDecoration: "none", marginTop: 8, display: "inline-block" }}>
@@ -139,7 +147,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                                     className="btn-gold"
                                     style={{ padding: "8px 20px", fontSize: 10 }}
                                 >
-                                    {order.paymentMethod === "cash" ? "CONFIRM CASH HANDOVER" : "RELEASE ON-CHAIN PAYMENT"}
+                                    RELEASE ON-CHAIN PAYMENT
                                 </button>
                             )}
                         </div>

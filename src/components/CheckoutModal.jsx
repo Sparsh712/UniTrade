@@ -11,6 +11,10 @@ const CAMPUS_LOCATIONS = [
     "Hostel Gate"
 ];
 
+function isPhoto(value) {
+    return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
+}
+
 export default function CheckoutModal({ listing, onClose, onConfirm, accountAddress, balance }) {
     const [loading, setLoading] = useState(false);
     const [pickupLocation, setPickupLocation] = useState(CAMPUS_LOCATIONS[0]);
@@ -33,7 +37,13 @@ export default function CheckoutModal({ listing, onClose, onConfirm, accountAddr
               exit={{ scale: 0.85, opacity: 0, y: 40 }}
               transition={{ type: "spring", damping: 22, stiffness: 280 }}
             >
-                <div style={{ fontSize: 64, textAlign: "center", marginBottom: 24, animation: "float 4s ease-in-out infinite" }}>{listing.image}</div>
+                {isPhoto(listing.image) ? (
+                    <div style={{ width: "100%", height: 180, marginBottom: 24, borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
+                        <img src={listing.image} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                ) : (
+                    <div style={{ fontSize: 64, textAlign: "center", marginBottom: 24, animation: "float 4s ease-in-out infinite" }}>{listing.image}</div>
+                )}
                 <h2 className="serif" style={{ margin: "0 0 12px", color: "var(--text)", textAlign: "center", fontSize: "clamp(20px, 4vw, 24px)", fontWeight: 800 }}>{listing.title.toUpperCase()}</h2>
                 <p style={{ margin: "0 0 32px", color: "var(--text-muted)", textAlign: "center", fontSize: 13, lineHeight: 1.6 }}>{listing.description}</p>
 
@@ -95,34 +105,21 @@ export default function CheckoutModal({ listing, onClose, onConfirm, accountAddr
                 </div>
 
                 <div style={{ display: "flex", gap: 16, flexDirection: "column" }}>
-                    <div style={{ display: "flex", gap: 16 }}>
-                        <button
-                            onClick={async () => {
-                                setLoading(true);
-                                await onConfirm(pickupLocation, "cash");
-                                setLoading(false);
-                            }}
-                            disabled={loading}
-                            className="btn-outline"
-                            style={{ flex: 1, padding: "14px 0", fontSize: 11, background: loading ? "var(--s2)" : "transparent" }}>
-                            {loading ? "PROCESSING..." : "CASH HANDOVER"}
-                        </button>
-                        <button
-                            onClick={async () => {
-                                setLoading(true);
-                                await onConfirm(pickupLocation, "algo");
-                                setLoading(false);
-                            }}
-                            disabled={loading}
-                            className="btn-gold"
-                            style={{ flex: 2, padding: "14px 0", fontSize: 11 }}>
-                            {loading ? (
-                                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                                    <span style={{ animation: "spin 1s linear infinite" }}>◌</span> PROCESSING...
-                                </span>
-                            ) : "PURCHASE WITH ALGO"}
-                        </button>
-                    </div>
+                    <button
+                        onClick={async () => {
+                            setLoading(true);
+                            await onConfirm(pickupLocation);
+                            setLoading(false);
+                        }}
+                        disabled={loading}
+                        className="btn-gold"
+                        style={{ width: "100%", padding: "14px 0", fontSize: 11 }}>
+                        {loading ? (
+                            <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                                <span style={{ animation: "spin 1s linear infinite" }}>◌</span> PROCESSING...
+                            </span>
+                        ) : "PURCHASE WITH ALGO"}
+                    </button>
                     <button onClick={onClose} disabled={loading} className="btn-text-gold" style={{ fontSize: 11 }}>CANCEL TRANSACTION</button>
                 </div>
             </motion.div>

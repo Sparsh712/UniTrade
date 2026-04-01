@@ -15,6 +15,10 @@ function formatTimeFromIso(isoDate) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function isPhoto(value) {
+  return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
+}
+
 function OfferCard({ message, canAct, onAccept, onReject }) {
   const statusColor =
     message.offerStatus === "accepted"
@@ -68,6 +72,8 @@ function getSenderLabel({ isMe, message, sellerId }) {
 
 export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onOfferAccepted, showToast }) {
   const endRef = useRef(null);
+  const listingImage = listing.imageUrl || listing.image;
+  const hasListingPhoto = isPhoto(listingImage);
 
   const sellerAddress = listing.sellerAddress || listing.seller?.walletAddress || listing.seller;
   const sellerId = listing.ownerId || listing.seller?.userId || "";
@@ -292,17 +298,15 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
 
   return (
     <motion.div
-      className="modal-backdrop"
-      style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex", justifyContent: "flex-end", alignItems: "stretch" }}
-      onClick={(event) => event.target === event.currentTarget && onClose()}
-      initial={{ backgroundColor: "rgba(0,0,0,0)" }}
-      animate={{ backgroundColor: "rgba(0,0,0,0.6)" }}
-      exit={{ backgroundColor: "rgba(0,0,0,0)" }}
-      transition={{ duration: 0.3 }}
+      style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "min(100vw, 460px)", zIndex: 1000, pointerEvents: "none" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
     >
       <motion.div
         className="chat-drawer-panel"
-        style={{ width: "100%", maxWidth: 460, display: "flex", flexDirection: "column" }}
+        style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", pointerEvents: "auto" }}
         initial={{ x: "100%", opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: "100%", opacity: 0 }}
@@ -310,7 +314,13 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
       >
         {/* Header */}
         <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 16, background: "rgba(255,255,255,0.02)" }}>
-          <span style={{ fontSize: 32 }}>{listing.image}</span>
+          <div style={{ width: 48, height: 48, borderRadius: 10, overflow: "hidden", background: "var(--s2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            {hasListingPhoto ? (
+              <img src={listingImage} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 24 }}>{listing.image}</span>
+            )}
+          </div>
           <div style={{ flex: 1 }}>
             <div className="serif" style={{ fontWeight: 800, color: "var(--text)", fontSize: 18 }}>UNITRADE INBOX.</div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>
@@ -345,9 +355,15 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
 
         {/* Listing preview slab */}
         <div style={{ margin: "16px 20px 0", padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 16, borderRadius: "16px" }}>
-          <div style={{ fontSize: 34, background: "var(--s2)", padding: "10px 14px" }}>{listing.image}</div>
+          <div style={{ width: 58, height: 58, borderRadius: 10, overflow: "hidden", background: "var(--s2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            {hasListingPhoto ? (
+              <img src={listingImage} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 34 }}>{listing.image}</span>
+            )}
+          </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>{listing.title}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{listing.title}</div>
             <div style={{ fontSize: 12, color: "var(--gold)", fontFamily: "'Space Mono', monospace" }}>{listing.price} ALGO LISTED</div>
           </div>
           {!isSeller && (

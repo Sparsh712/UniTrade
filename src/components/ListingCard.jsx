@@ -26,10 +26,15 @@ const buttonVariants = {
     hover: { scale: 1.03, transition: { duration: 0.15 } }
 };
 
+function isPhoto(value) {
+    return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
+}
+
 export default function ListingCard({ listing, onBuy, accountAddress, currentUserId, wishlist, onToggleWishlist, onChat, onDelete }) {
     const isWished = wishlist?.includes(listing.id);
     const sellerAddress = listing.sellerAddress || listing.seller?.walletAddress || listing.seller;
     const isOwner = Boolean(accountAddress && sellerAddress && accountAddress === sellerAddress);
+    const hasPhoto = isPhoto(listing.image);
 
     return (
         <motion.div
@@ -56,7 +61,15 @@ export default function ListingCard({ listing, onBuy, accountAddress, currentUse
 
             {/* Thumbnail */}
             <motion.div className="card-thumb" variants={thumbVariants}>
-                <span style={{ position: "relative", zIndex: 1 }}>{listing.image}</span>
+                {hasPhoto ? (
+                    <img
+                        src={listing.image}
+                        alt={listing.title}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }}
+                    />
+                ) : (
+                    <span style={{ position: "relative", zIndex: 1 }}>{listing.image}</span>
+                )}
                 <motion.button
                     className={`wishlist-btn${isWished ? " active" : ""}`}
                     onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(listing.id); }}

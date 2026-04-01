@@ -11,7 +11,6 @@ export default function ReceiptModal({ order, onClose }) {
 
     const algoPrice = Number(order.price || order.finalPrice || order.amount || 0);
     const inrValue = (algoPrice * 15).toLocaleString("en-IN");
-    const isCash = order.paymentMethod === "cash";
 
     return (
         <motion.div
@@ -96,11 +95,11 @@ export default function ReceiptModal({ order, onClose }) {
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
                         <span style={{ fontSize: 10, color: "var(--text-dim)", fontFamily: "'Space Mono', monospace", fontWeight: 700 }}>PAYMENT METHOD</span>
                         <span style={{ fontSize: 10, color: "var(--text)", fontFamily: "'Space Mono', monospace" }}>
-                            {isCash ? "CASH ENCLOSED" : "ON-CHAIN (ALGO)"}
+                            ON-CHAIN (ALGO)
                         </span>
                     </div>
 
-                    {!isCash && order.txId && (
+                    {order.txId && (
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <span style={{ fontSize: 10, color: "var(--text-dim)", fontFamily: "'Space Mono', monospace", fontWeight: 700 }}>TX HASH</span>
                             <span style={{ fontSize: 10, color: "var(--text)", fontFamily: "'Space Mono', monospace" }}>{truncate(order.txId)}</span>
@@ -139,7 +138,7 @@ export default function ReceiptModal({ order, onClose }) {
                 <div style={{ marginTop: 32, textAlign: "center", opacity: 0.6 }}>
                     <div style={{ fontSize: 24, fontFamily: "serif", fontStyle: "italic", letterSpacing: "0.1em" }}>Verified by UniTrade</div>
                     <div style={{ fontSize: 8, color: "var(--text-dim)", fontFamily: "'Space Mono', monospace", marginTop: 4 }}>
-                        {isCash ? "CASH HANDOVER VERIFIED BY SECURE OTP." : "STATE VERIFIED VIA ALGORAND TESTNET SIGNATURE."}
+                        STATE VERIFIED VIA ALGORAND TESTNET SIGNATURE.
                     </div>
                 </div>
 

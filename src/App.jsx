@@ -21,6 +21,10 @@ import { orderStatus, paymentStatus } from "./services/ordersService";
 const peraWallet = new PeraWalletConnect();
 const algodClient = new algosdk.Algodv2("", "https://testnet-api.algonode.cloud", "");
 
+function isPhoto(value) {
+  return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
+}
+
 const CATEGORIES = ["All", "Books", "Electronics", "Clothing", "Furniture", "Cycles", "Lab Equipment", "Notes", "Misc"];
 
 export default function App() {
@@ -267,11 +271,10 @@ export default function App() {
     }
   };
 
-  const handlePayment = async (pickupLocation, paymentMethod = "algo") => {
+  const handlePayment = async (pickupLocation) => {
     const listing = checkoutItem;
-    const normalizedPaymentMethod = paymentMethod === "cash" ? "cash" : "algo";
     if (!listing || !userId) return;
-    if (normalizedPaymentMethod === "algo" && !accountAddress) return;
+    if (!accountAddress) return;
 
     const receiverAddress = listing.sellerAddress || listing.seller?.walletAddress || listing.seller;
     const sellerId = listing.ownerId || listing.seller?.userId || "";
@@ -283,7 +286,7 @@ export default function App() {
         await updateOrder(orderId, {
           status: orderStatus.PENDING,
           paymentStatus: paymentStatus.HELD,
-          paymentMethod: normalizedPaymentMethod,
+          paymentMethod: "algo",
           txId: null,
           amount: payablePrice,
           price: payablePrice,
@@ -298,7 +301,7 @@ export default function App() {
           offerMessageId: listing.offerMessageId || "",
           buyerId: userId,
           sellerId,
-          buyerAddress: accountAddress || "cash-buyer",
+          buyerAddress: accountAddress,
           sellerAddress: receiverAddress,
           title: listing.title,
           image: listing.image,
@@ -306,7 +309,7 @@ export default function App() {
           amount: payablePrice,
           negotiatedPrice: Number(listing.negotiatedPrice || 0),
           finalPrice: payablePrice,
-          paymentMethod: normalizedPaymentMethod,
+          paymentMethod: "algo",
           txId: null,
           status: orderStatus.PENDING,
           paymentStatus: paymentStatus.HELD,
@@ -320,11 +323,7 @@ export default function App() {
 
       setCheckoutItem(null);
       setTab("my-orders");
-      if (normalizedPaymentMethod === "cash") {
-        showToast("Cash order created. OTP verification is required before you confirm cash handover.", "success");
-      } else {
-        showToast("Order created. Payment is held until seller verifies OTP and you release it.", "success");
-      }
+      showToast("Order created. Payment is held until seller verifies OTP and you release it.", "success");
     } catch (error) {
       console.error("[UniTrade] Order placement error:", error);
       setCheckoutItem(null);
@@ -371,9 +370,7 @@ export default function App() {
         throw new Error("Order not found in local state.");
       }
 
-      const isCashOrder = verifiedOrder.paymentMethod === "cash";
-
-      if (!isCashOrder && !accountAddress) {
+      if (!accountAddress) {
         throw new Error("Connect your wallet to release payment.");
       }
 
@@ -389,24 +386,21 @@ export default function App() {
         throw new Error("Missing seller wallet address for this order.");
       }
 
-      let txid = "CASH";
-      if (!isCashOrder) {
-        const suggestedParams = await algodClient.getTransactionParams().do();
-        const amount = algosdk.algosToMicroalgos(Number(verifiedOrder.price || verifiedOrder.finalPrice || verifiedOrder.amount || 0));
-        const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-          sender: accountAddress,
-          receiver: verifiedOrder.sellerAddress,
-          amount,
-          suggestedParams,
-          note: new TextEncoder().encode(`UniTrade release: ${verifiedOrder.title}`),
-        });
+      const suggestedParams = await algodClient.getTransactionParams().do();
+      const amount = algosdk.algosToMicroalgos(Number(verifiedOrder.price || verifiedOrder.finalPrice || verifiedOrder.amount || 0));
+      const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+        sender: accountAddress,
+        receiver: verifiedOrder.sellerAddress,
+        amount,
+        suggestedParams,
+        note: new TextEncoder().encode(`UniTrade release: ${verifiedOrder.title}`),
+      });
 
-        const signedTxn = await peraWallet.signTransaction([[{ txn, signers: [accountAddress] }]]);
-        const sendResponse = await algodClient.sendRawTransaction(signedTxn).do();
-        txid = sendResponse.txid || sendResponse.txId || sendResponse["txId"];
+      const signedTxn = await peraWallet.signTransaction([[{ txn, signers: [accountAddress] }]]);
+      const sendResponse = await algodClient.sendRawTransaction(signedTxn).do();
+      const txid = sendResponse.txid || sendResponse.txId || sendResponse["txId"];
 
-        await algosdk.waitForConfirmation(algodClient, txid, 10);
-      }
+      await algosdk.waitForConfirmation(algodClient, txid, 10);
 
       await releaseOrderPayment(orderId, userId, txid);
 
@@ -414,11 +408,9 @@ export default function App() {
         await setListingSold(verifiedOrder.listingId, verifiedOrder.buyerId);
       }
 
-      if (!isCashOrder) {
-        fetchBalance(accountAddress);
-      }
+      fetchBalance(accountAddress);
       setGreenTrades((prev) => prev + 1);
-      showToast(isCashOrder ? "Cash handover confirmed after OTP verification." : "Payment released to seller after OTP verification.", "success");
+      showToast("Payment released to seller after OTP verification.", "success");
       setReceiptOrder(verifiedOrder);
     });
   };
@@ -705,7 +697,13 @@ export default function App() {
               <div className="hero-right">
                 {featuredListing ? (
                   <div className="featured-card">
-                    <div className="featured-thumb">{featuredListing.image}</div>
+                    <div className="featured-thumb">
+                      {isPhoto(featuredListing.image) ? (
+                        <img src={featuredListing.image} alt={featuredListing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        featuredListing.image
+                      )}
+                    </div>
                     <div className="featured-body">
                       <div className="featured-label">Featured Listing</div>
                       <div className="featured-title">{featuredListing.title}</div>

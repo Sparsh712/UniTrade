@@ -12,7 +12,8 @@ import {
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore";
-import { auth, db } from "../firebase/config";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, db, storage } from "../firebase/config";
 
 const LISTINGS_COLLECTION = "listings";
 
@@ -78,6 +79,46 @@ function assertFirestoreReady() {
   }
 }
 
+function assertStorageReady() {
+  if (!storage) {
+    throw new Error("Firebase Storage is not initialized. Add Firebase env variables to upload listing photos.");
+  }
+}
+
+function isPhotoLike(value) {
+  return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
+}
+
+function isUrlLike(value) {
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized.startsWith("http://") || normalized.startsWith("https://") || normalized.startsWith("blob:") || normalized.startsWith("data:");
+}
+
+function sanitizeTitle(value) {
+  if (typeof value !== "string") return "CAMPUS ITEM";
+  const trimmed = value.trim();
+  if (!trimmed || isUrlLike(trimmed)) return "CAMPUS ITEM";
+  return trimmed;
+}
+
+async function uploadListingPhoto(file, ownerId) {
+  assertStorageReady();
+
+  const ext = (file?.name?.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const safeType = (file?.type || "image/jpeg").toLowerCase();
+  const timestamp = Date.now();
+  const fileRef = ref(storage, `listing-photos/${ownerId}/${timestamp}.${ext}`);
+
+  await withTimeout(
+    uploadBytes(fileRef, file, { contentType: safeType }),
+    20000,
+    "Photo upload timed out. Check network and try again."
+  );
+
+  return getDownloadURL(fileRef);
+}
+
 function normalizeSeller(seller) {
   if (typeof seller === "string") {
     return {
@@ -104,12 +145,13 @@ function mapSnapshotToListing(snapshot) {
 
   return {
     id: snapshot.id,
-    title: data.title || "",
+    title: sanitizeTitle(data.title),
     price: Number(data.price || 0),
     description: data.description || "",
     category: data.category || "Misc",
     condition: data.condition || "Good",
-    image: data.image || "📦",
+    image: data.imageUrl || data.image || "📦",
+    imageUrl: data.imageUrl || (isPhotoLike(data.image) ? data.image : ""),
     seller,
     ownerId: data.ownerId || seller.userId || "",
     sellerAddress: seller.walletAddress,
@@ -173,13 +215,19 @@ export async function createListing(payload) {
     throw new Error("Auth mismatch detected. Refresh the page and retry.");
   }
 
+  let imageUrl = payload.imageUrl || (isPhotoLike(payload.image) ? payload.image : "");
+  if (!imageUrl && payload.photoFile) {
+    imageUrl = await uploadListingPhoto(payload.photoFile, ownerId);
+  }
+
   const docData = {
-    title: payload.title,
+    title: sanitizeTitle(payload.title),
     price: Number(payload.price),
     description: payload.description,
     category: payload.category,
     condition: payload.condition || "Good",
-    image: payload.image || "📦",
+    image: imageUrl || payload.image || "📦",
+    imageUrl: imageUrl || "",
     seller,
     ownerId,
     sellerAddress: seller.walletAddress,

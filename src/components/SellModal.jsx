@@ -4,7 +4,6 @@ import { labelStyle } from "./Shared";
 import { requestListingSuggestion, toAiImagePayload } from "../services/listingAiService";
 
 const CATEGORIES = ["Books", "Electronics", "Clothing", "Furniture", "Misc"];
-const emojis = ["📦", "📘", "📗", "📙", "🖩", "⌨️", "🖥️", "📱", "🔌", "🪑", "👕", "👟", "🎮", "🎸", "🎒"];
 
 function withTimeout(promise, timeoutMs, timeoutMessage) {
     return new Promise((resolve, reject) => {
@@ -21,8 +20,14 @@ function withTimeout(promise, timeoutMs, timeoutMessage) {
     });
 }
 
+function isUrlLike(value) {
+    if (typeof value !== "string") return false;
+    const v = value.trim().toLowerCase();
+    return v.startsWith("http://") || v.startsWith("https://") || v.startsWith("blob:") || v.startsWith("data:");
+}
+
 export default function SellModal({ onClose, onList, accountAddress }) {
-    const [form, setForm] = useState({ title: "", category: "Books", price: "", description: "", condition: "Good", image: "📦" });
+    const [form, setForm] = useState({ title: "", category: "Books", price: "", description: "", condition: "Good", image: "" });
     const [selectedImageFile, setSelectedImageFile] = useState(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState("");
     const [aiSuggestionAlgo, setAiSuggestionAlgo] = useState("");
@@ -96,7 +101,8 @@ export default function SellModal({ onClose, onList, accountAddress }) {
                 ...imagePayload,
                 listedCondition: form.condition,
             });
-            const fallbackTitle = form.title || suggestion.title;
+            const suggestedTitle = isUrlLike(suggestion.title) ? "" : suggestion.title;
+            const fallbackTitle = form.title || suggestedTitle;
             const suggestedPrice = extractSuggestedPrice(suggestion.estimatedPrice);
 
             setForm((current) => ({
@@ -122,12 +128,17 @@ export default function SellModal({ onClose, onList, accountAddress }) {
             return;
         }
 
+        if (!selectedImageFile) {
+            setError("UPLOAD ITEM PHOTO BEFORE PUBLISHING.");
+            return;
+        }
+
         setSubmitting(true);
         setError("");
 
         try {
             await withTimeout(
-                onList({ ...form, price: parseFloat(form.price), sellerAddress: accountAddress }),
+                onList({ ...form, price: parseFloat(form.price), sellerAddress: accountAddress, photoFile: selectedImageFile, image: imagePreviewUrl }),
                 15000,
                 "LISTING TIMEOUT. CHECK NETWORK STATE."
             );
@@ -187,30 +198,6 @@ export default function SellModal({ onClose, onList, accountAddress }) {
                             >
                                 {analyzingImage ? "ANALYZING..." : "GENERATE AI METADATA →"}
                             </motion.button>
-                        </div>
-                    </div>
-
-                    {/* Icon Selection */}
-                    <div>
-                        <label style={{ ...labelStyle, display: "block", marginBottom: 12 }}>ITEM ICON</label>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                            {emojis.map(e => (
-                                <motion.button 
-                                    key={e} 
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setForm(f => ({ ...f, image: e }))}
-                                    style={{ 
-                                        fontSize: 24, 
-                                        width: 48, 
-                                        height: 48, 
-                                        background: form.image === e ? "rgba(0, 242, 254, 0.15)" : "rgba(0,0,0,0.2)", 
-                                        border: `1px solid ${form.image === e ? "var(--pulse)" : "rgba(255,255,255,0.1)"}`, 
-                                        borderRadius: 12,
-                                        cursor: "pointer", 
-                                        transition: "all .2s" 
-                                    }}>{e}</motion.button>
-                            ))}
                         </div>
                     </div>
 
