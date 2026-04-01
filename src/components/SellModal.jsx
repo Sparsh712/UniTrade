@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { labelStyle } from "./Shared";
 import { requestListingSuggestion, toAiImagePayload } from "../services/listingAiService";
 
-const CATEGORIES = ["Books", "Electronics", "Clothing", "Furniture", "Misc"];
+const CATEGORIES = ["Books", "Electronics", "Clothing", "Furniture", "Cycles", "Lab Equipment", "Notes", "Misc"];
 
 function withTimeout(promise, timeoutMs, timeoutMessage) {
     return new Promise((resolve, reject) => {
@@ -266,7 +266,7 @@ export default function SellModal({ onClose, onList, accountAddress }) {
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                             <label style={labelStyle}>CONDITION</label>
                             <select className="input-box" style={{ width: "100%", padding: "14px" }} value={form.condition} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))}>
-                                {["Like New", "Excellent", "Good", "Fair"].map(c => <option key={c} style={{ background: "#1e293b" }}>{c.toUpperCase()}</option>)}
+                                {["Like New", "Excellent", "Good", "Fair", "Bad"].map(c => <option key={c} style={{ background: "#1e293b" }}>{c.toUpperCase()}</option>)}
                             </select>
                         </div>
                     </div>

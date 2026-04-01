@@ -51,7 +51,16 @@ export default function MapModal({ onClose }) {
                     <button onClick={onClose} className="btn-text-gold" style={{ fontSize: 24 }}>✕</button>
                 </div>
 
-                <div style={{ border: "1px solid var(--border)", overflow: "hidden", height: 400, background: "var(--s0)" }}>
+                <div
+                    style={{
+                        border: "1px solid rgba(255, 255, 255, 0.14)",
+                        borderRadius: 16,
+                        overflow: "hidden",
+                        height: 400,
+                        background: "rgba(2, 6, 23, 0.35)",
+                        boxShadow: "0 12px 36px rgba(0, 0, 0, 0.45)",
+                    }}
+                >
                     <MapContainer center={[28.47570, 77.50120]} zoom={18} style={{ height: "100%", width: "100%" }} scrollWheelZoom={true}>
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -77,9 +86,23 @@ export default function MapModal({ onClose }) {
                 {/* Spot List */}
                 <div style={{ marginTop: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     {PICKUP_SPOTS.map((spot, i) => (
-                        <div key={i} style={{ background: "var(--s0)", border: "1px solid var(--border)", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 4 }}>
+                        <div
+                            key={i}
+                            style={{
+                                background: "rgba(15, 23, 42, 0.42)",
+                                border: "1px solid rgba(255, 255, 255, 0.14)",
+                                borderRadius: 12,
+                                padding: "12px 16px",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 4,
+                                backdropFilter: "blur(14px) saturate(170%)",
+                                WebkitBackdropFilter: "blur(14px) saturate(170%)",
+                                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.28)",
+                            }}
+                        >
                             <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text)" }}>{spot.name.toUpperCase()}</div>
-                            <div style={{ fontSize: 9, color: "var(--text-dim)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>{spot.desc}</div>
+                            <div style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>{spot.desc}</div>
                         </div>
                     ))}
                 </div>

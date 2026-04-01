@@ -176,6 +176,10 @@ body {
 .modal-backdrop {
   background: rgba(2, 6, 23, 0.8) !important;
   backdrop-filter: blur(12px) !important;
+  z-index: 3000 !important;
+  align-items: flex-start !important;
+  overflow: hidden !important;
+  padding: 96px 16px 24px !important;
 }
 
 .modal-panel {
@@ -184,6 +188,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   border-radius: var(--radius-lg) !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  max-height: calc(100vh - 120px) !important;
+  overflow-y: auto !important;
 }
 
 /* Forms */
@@ -218,6 +224,59 @@ body {
 .hero-stats {
   border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
+}
+
+/* Hero featured panel alignment with glass system */
+.hero-right {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(2, 6, 23, 0.65) 100%) !important;
+  border-left: 1px solid var(--glass-border) !important;
+  padding: 48px 36px !important;
+}
+
+.featured-card {
+  width: 100% !important;
+  max-width: 360px !important;
+  background: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 242, 254, 0.08) inset !important;
+}
+
+.featured-thumb {
+  height: 210px !important;
+  background: rgba(2, 6, 23, 0.45) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.featured-body {
+  padding: 20px 22px 22px !important;
+}
+
+.featured-label {
+  color: var(--pulse-dim) !important;
+  letter-spacing: 0.18em !important;
+}
+
+.featured-title {
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  margin-bottom: 14px !important;
+}
+
+.featured-price {
+  color: var(--pulse) !important;
+  text-shadow: 0 0 22px rgba(0, 242, 254, 0.28) !important;
+}
+
+.featured-hr {
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.featured-tag {
+  color: var(--text-muted) !important;
 }
 
 /* Utility to bridge some old names */

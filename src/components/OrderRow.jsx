@@ -43,6 +43,15 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
 
     const attemptsLeft = Math.max(0, Number(order.otpMaxAttempts || 5) - Number(order.otpAttempts || 0));
 
+    const glassPanel = {
+        background: "rgba(15, 23, 42, 0.45)",
+        border: "1px solid rgba(255, 255, 255, 0.12)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        boxShadow: "0 10px 35px rgba(0, 0, 0, 0.45)",
+        borderRadius: 14,
+    };
+
     const handleVerify = async () => {
         if (!otpInput.trim()) {
             setOtpError("ENTER OTP BEFORE SUBMITTING.");
@@ -62,17 +71,17 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
     };
 
     return (
-        <div style={{ 
-            background: "var(--bg)", 
-            borderBottom: "1px solid var(--border)", 
-            padding: "24px 0", 
+        <div style={{
+            ...glassPanel,
+            padding: "24px",
+            marginBottom: 16,
             display: "grid", 
             gridTemplateColumns: "auto 1fr auto auto", 
             gap: 24, 
             alignItems: "start", 
             animation: "fadeIn .3s ease" 
         }}>
-            <div style={{ background: "var(--s0)", border: "1px solid var(--border)", width: 72, height: 72, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ background: "rgba(2, 6, 23, 0.35)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 10, width: 72, height: 72, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {isPhoto(order.image) ? (
                     <img src={order.image} alt={order.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
@@ -86,7 +95,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                 <div style={{ fontSize: 11, color: "var(--text-dim)", fontFamily: "'Space Mono', monospace", marginTop: 8, display: "flex", flexDirection: "column", gap: 4, letterSpacing: "0.02em" }}>
                     <div>RECEIVER: {truncate(order.receiver)} · {new Date(order.date).toLocaleDateString().toUpperCase()}</div>
                     {order.pickupLocation && <div>PICKUP: {order.pickupLocation.toUpperCase()}</div>}
-                    {order.negotiatedPrice > 0 && <div style={{ color: "var(--gold)" }}>NEGOTIATED: {order.negotiatedPrice} ALGO</div>}
+                    {order.negotiatedPrice > 0 && <div style={{ color: "var(--pulse)" }}>NEGOTIATED: {order.negotiatedPrice} ALGO</div>}
                     <div>
                         LEDGER STATUS: <span style={{ color: "var(--text-muted)" }}>{order.paymentStatus === "released" ? "PAYMENT RELEASED" : "PAYMENT HELD ON-CHAIN"}</span>
                     </div>
@@ -95,7 +104,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                 {order.txId && (
                     <a href={`https://lora.algokit.io/testnet/transaction/${order.txId}`} target="_blank" rel="noreferrer"
                         className="btn-text-gold"
-                        style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", textDecoration: "none", marginTop: 8, display: "inline-block" }}>
+                        style={{ fontSize: 10, fontFamily: "'Space Mono', monospace", textDecoration: "none", marginTop: 8, display: "inline-block", color: "var(--pulse)" }}>
                         VIEW TX: {truncate(order.txId)} ↗
                     </a>
                 )}
@@ -109,11 +118,12 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                                 padding: "4px 10px",
                                 fontSize: 9,
                                 fontWeight: 700,
-                                border: `1px solid ${step.done ? "var(--emerald)" : "var(--border-mid)"}`,
-                                color: step.done ? "var(--emerald)" : "var(--text-dim)",
-                                background: step.done ? "rgba(0,255,148,0.05)" : "transparent",
+                                border: `1px solid ${step.done ? "rgba(0, 255, 148, 0.6)" : "rgba(255, 255, 255, 0.16)"}`,
+                                color: step.done ? "var(--emerald)" : "var(--text-muted)",
+                                background: step.done ? "rgba(0,255,148,0.08)" : "rgba(255, 255, 255, 0.02)",
                                 fontFamily: "'Space Mono', monospace",
-                                letterSpacing: "0.08em"
+                                letterSpacing: "0.08em",
+                                borderRadius: 8
                             }}
                         >
                             {formatStatus(step.key)}
@@ -123,9 +133,9 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
 
                 {/* OTP Actions for Buyer */}
                 {isBuyer && order.status === "ready_for_delivery" && order.paymentStatus === "held" && (
-                    <div style={{ marginTop: 24, background: "var(--s0)", border: "1px solid var(--border)", padding: 20 }}>
+                    <div style={{ marginTop: 24, background: "rgba(2, 6, 23, 0.35)", border: "1px solid rgba(255, 255, 255, 0.14)", borderRadius: 12, padding: 20 }}>
                         <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 8, fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>LEDGER OTP FOR HANDOVER:</div>
-                        <div style={{ fontSize: 32, letterSpacing: 4, fontWeight: 800, color: "var(--gold)", fontFamily: "'Space Mono', monospace" }}>
+                        <div style={{ fontSize: 32, letterSpacing: 4, fontWeight: 800, color: "var(--pulse)", textShadow: "0 0 18px rgba(0,242,254,0.3)", fontFamily: "'Space Mono', monospace" }}>
                             {order.buyerOtp || "SYNCING..."}
                         </div>
                         <div style={{ fontSize: 9, color: "var(--text-muted)", marginTop: 8, fontFamily: "'Space Mono', monospace" }}>EXPIRES: {formatExpiry(order.otpExpiresAt)}</div>
@@ -162,7 +172,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
 
                 {/* OTP Verification for Seller */}
                 {isSeller && order.status === "ready_for_delivery" && !order.otpVerified && (
-                    <div style={{ marginTop: 24, background: "var(--s0)", border: "1px solid var(--border)", padding: 20 }}>
+                    <div style={{ marginTop: 24, background: "rgba(2, 6, 23, 0.35)", border: "1px solid rgba(255, 255, 255, 0.14)", borderRadius: 12, padding: 20 }}>
                         <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 12, fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>
                             ENTER BUYER OTP TO VALIDATE HANDOVER. ATTEMPTS LEFT: {attemptsLeft}
                         </div>
@@ -196,7 +206,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                 )}
 
                 {isSeller && order.status === "ready_for_delivery" && order.otpVerified && order.paymentStatus === "held" && (
-                    <div style={{ marginTop: 24, background: "rgba(0,255,148,0.05)", border: "1px solid var(--emerald)", padding: 20 }}>
+                    <div style={{ marginTop: 24, background: "rgba(0,255,148,0.08)", border: "1px solid rgba(0,255,148,0.55)", borderRadius: 12, padding: 20 }}>
                         <div style={{ fontSize: 11, color: "var(--emerald)", fontWeight: 700 }}>OTP VERIFIED SUCCESSFULLY.</div>
                         <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 8, fontFamily: "'Space Mono', monospace" }}>
                             WAITING FOR BUYER TO FINALIZE ON-CHAIN RELEASE.
@@ -234,7 +244,7 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                     </div>
                 )}
                 {order.rated && (
-                    <div style={{ marginTop: 12, fontSize: 12, color: "var(--gold)", fontFamily: "'Space Mono', monospace" }}>
+                    <div style={{ marginTop: 12, fontSize: 12, color: "var(--pulse)", fontFamily: "'Space Mono', monospace" }}>
                         {"★".repeat(order.rating)}{"☆".repeat(5 - order.rating)} <span style={{ color: "var(--text-dim)", marginLeft: 8 }}>Voucher Logged</span>
                     </div>
                 )}
@@ -266,7 +276,9 @@ export default function OrderRow({ order, currentUserId, onRate, onVerifyOtp, on
                     color: statusColor[order.status] || "var(--text-dim)", 
                     fontFamily: "'Space Mono', monospace",
                     letterSpacing: "0.1em",
-                    border: `1px solid ${statusColor[order.status] || "var(--border)"}`,
+                    border: `1px solid ${statusColor[order.status] || "rgba(255,255,255,0.2)"}`,
+                    background: "rgba(2, 6, 23, 0.3)",
+                    borderRadius: 8,
                     padding: "4px 12px"
                 }}>
                     {formatStatus(order.status)}

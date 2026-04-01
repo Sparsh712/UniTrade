@@ -159,6 +159,55 @@ body::after {
   border-radius: var(--roundness) var(--roundness) 0 0 !important;
 }
 
+/* Featured Card (Glassmorphism override) */
+.featured-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: var(--blur) !important;
+  -webkit-backdrop-filter: var(--blur) !important;
+  border: 1px solid var(--border) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--roundness) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 242, 254, 0.05) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  overflow: hidden !important;
+}
+.featured-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(0, 242, 254, 0.4) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 254, 0.1) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+}
+.featured-thumb {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0 !important; /* Managed by card overflow */
+}
+.featured-label {
+  color: var(--gold) !important;
+  text-shadow: 0 0 8px rgba(0, 242, 254, 0.3) !important;
+  font-family: 'Space Grotesk', monospace !important;
+}
+.featured-title {
+  color: var(--text) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
+}
+.featured-price {
+  color: var(--text) !important;
+  font-family: 'Space Grotesk', monospace !important;
+}
+.featured-price span {
+  color: var(--gold) !important;
+}
+.featured-hr {
+  border-top: 1px dashed rgba(255, 255, 255, 0.15) !important;
+}
+.featured-tag {
+  color: var(--text-muted) !important;
+  font-family: 'Space Mono', monospace !important;
+}
+
 /* Modals (Authentication vibe) */
 .modal-backdrop {
   background: rgba(0, 0, 0, 0.6) !important;

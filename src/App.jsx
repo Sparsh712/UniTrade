@@ -185,7 +185,7 @@ export default function App() {
     }
   };
 
-  const CONDITIONS = ["All", "Like New", "Excellent", "Good", "Fair"];
+  const CONDITIONS = ["All", "Like New", "Excellent", "Good", "Fair", "Bad"];
 
   const getListingTimestamp = (listing) => {
     if (listing?.timestamp?.toDate) return listing.timestamp.toDate().getTime();
@@ -473,7 +473,8 @@ export default function App() {
   const co2Saved = (greenTrades * 0.0002).toFixed(4);
 
   // Featured listing for hero (first active listing)
-  const featuredListing = listings.find(l => l.isActive !== false);
+  const featuredListing = listings.find(l => l.isActive !== false && !l.sold);
+  const totalActiveMarketListings = listings.filter(l => l.isActive !== false && !l.sold).length;
 
   // Tab label map
   const TAB_LABELS = {
@@ -488,7 +489,7 @@ export default function App() {
     { text: "ALGORAND TESTNET", gold: false },
     { text: "TXN FEE  0.001 ALGO", gold: false },
     { text: "CARBON-NEUTRAL BLOCKCHAIN", gold: false },
-    { text: `${listings.length} ACTIVE LISTINGS`, gold: true },
+    { text: `${totalActiveMarketListings} ACTIVE LISTINGS`, gold: true },
     { text: "BLOCK FINALITY  ~3.6s", gold: false },
     { text: "POWERED BY ALGORAND", gold: false },
     { text: "UNITRADE P2P MARKETPLACE", gold: true },
@@ -670,7 +671,7 @@ export default function App() {
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
                   {[
-                    { num: listings.length, lbl: "Active Listings" },
+                    { num: totalActiveMarketListings, lbl: "Active Listings" },
                     { num: "<0.001", lbl: "ALGO Fee" },
                     { num: "100%", lbl: "Carbon-Neutral" }
                   ].map((s, i) => (
@@ -707,7 +708,7 @@ export default function App() {
                       )}
                     </div>
                     <div className="featured-body">
-                      <div className="featured-label">Featured Listing</div>
+                      <div className="featured-label">Latest Listing</div>
                       <div className="featured-title">{featuredListing.title}</div>
                       <span className="featured-price">{featuredListing.price} <span style={{ fontSize: 16, color: "var(--gold-muted)" }}>ALGO</span></span>
                       <hr className="featured-hr" />

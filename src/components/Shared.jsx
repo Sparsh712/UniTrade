@@ -74,6 +74,7 @@ export const conditionColor = {
     "Excellent": "var(--gold)",
     "Good":      "var(--amber)",
     "Fair":      "var(--red)",
+    "Bad":       "var(--red)",
 };
 
 // ── Shared Styles (modal forms) ──
