@@ -27,8 +27,8 @@
   
   /* Text System */
   --text:            #f8fafc;
-  --text-muted:      #94a3b8;
-  --text-dim:        #64748b;
+  --text-muted:      #ece9de;
+  --text-dim:        #d7d2c4;
 
   /* Typography */
   --font-editorial: 'Playfair Display', serif;
@@ -222,8 +222,20 @@ body {
 }
 
 .hero-stats {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(30, 41, 80, 0.58) 55%, rgba(12, 22, 54, 0.82) 100%) !important;
+  border: 1px solid rgba(0, 242, 254, 0.22) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(0, 242, 254, 0.12) !important;
   border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
+}
+
+.stat-box {
+  background: linear-gradient(180deg, rgba(0, 242, 254, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.stat-lbl {
+  color: rgba(248, 250, 252, 0.82) !important;
 }
 
 /* Hero featured panel alignment with glass system */
