@@ -110,11 +110,19 @@ async function uploadListingPhoto(file, ownerId) {
   const timestamp = Date.now();
   const fileRef = ref(storage, `listing-photos/${ownerId}/${timestamp}.${ext}`);
 
-  await withTimeout(
-    uploadBytes(fileRef, file, { contentType: safeType }),
-    20000,
-    "Photo upload timed out. Check network and try again."
-  );
+  try {
+    const uploadTask = uploadBytes(fileRef, file, { contentType: safeType });
+    uploadTask.catch(e => console.error("Firebase Storage Upload Error:", e));
+    
+    await withTimeout(
+      uploadTask,
+      60000,
+      "Photo upload timed out (60s). Check network and try again."
+    );
+  } catch (err) {
+    console.error("Upload explicitly failed or timed out:", err);
+    throw err;
+  }
 
   return getDownloadURL(fileRef);
 }
@@ -198,6 +206,15 @@ export async function probeListingsReadAccess() {
   }
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export async function createListing(payload) {
   const ref = listingsRef();
   const seller = normalizeSeller(payload.seller || payload.sellerAddress);
@@ -215,10 +232,36 @@ export async function createListing(payload) {
     throw new Error("Auth mismatch detected. Refresh the page and retry.");
   }
 
-  let imageUrl = payload.imageUrl || (isPhotoLike(payload.image) ? payload.image : "");
-  if (!imageUrl && payload.photoFile) {
-    imageUrl = await uploadListingPhoto(payload.photoFile, ownerId);
+  // Always upload the file if provided (never use blob: URLs as stored imageUrl)
+  let imageUrl = "";
+  if (payload.photoFile) {
+    try {
+      // Fast timeout: if Firebase Storage bucket is unprovisioned/CORS blocked, fallback fast
+      imageUrl = await withTimeout(
+        uploadListingPhoto(payload.photoFile, ownerId),
+        12000,
+        "Storage timeout"
+      );
+    } catch (err) {
+      console.warn("Storage upload failed, falling back to Base64 in Firestore:", err);
+      try {
+        imageUrl = await fileToDataUrl(payload.photoFile);
+      } catch (encodeErr) {
+        console.error("Base64 encode failed:", encodeErr);
+      }
+    }
+  } else {
+    // Accept http/https URLs from external sources, but never blob: (they're local-only)
+    const candidate = payload.imageUrl || payload.image || "";
+    imageUrl = (isPhotoLike(candidate) && !candidate.startsWith("blob:")) ? candidate : "";
   }
+
+  // For the Firestore `image` field, also exclude blob: URLs so listings load correctly
+  const safeImageFallback = (() => {
+    const candidate = payload.image || "";
+    if (isPhotoLike(candidate) && !candidate.startsWith("blob:")) return candidate;
+    return "📦";
+  })();
 
   const docData = {
     title: sanitizeTitle(payload.title),
@@ -226,7 +269,7 @@ export async function createListing(payload) {
     description: payload.description,
     category: payload.category,
     condition: payload.condition || "Good",
-    image: imageUrl || payload.image || "📦",
+    image: imageUrl || safeImageFallback,
     imageUrl: imageUrl || "",
     seller,
     ownerId,

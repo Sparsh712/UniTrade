@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Badge, truncate, conditionColor } from "./Shared";
 
@@ -30,11 +30,12 @@ function isPhoto(value) {
     return typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:image/") || value.startsWith("blob:"));
 }
 
-export default function ListingCard({ listing, onBuy, accountAddress, currentUserId, wishlist, onToggleWishlist, onChat, onDelete }) {
+export default function ListingCard({ listing, onBuy, accountAddress, currentUserId, wishlist, onToggleWishlist, onChat, onDelete, onView }) {
     const isWished = wishlist?.includes(listing.id);
     const sellerAddress = listing.sellerAddress || listing.seller?.walletAddress || listing.seller;
     const isOwner = Boolean(accountAddress && sellerAddress && accountAddress === sellerAddress);
     const hasPhoto = isPhoto(listing.image);
+    const [imgError, setImgError] = useState(false);
 
     return (
         <motion.div
@@ -43,7 +44,7 @@ export default function ListingCard({ listing, onBuy, accountAddress, currentUse
             initial="hidden"
             animate="visible"
             whileHover="hover"
-            style={{ height: "100%", position: "relative" }}
+            style={{ height: "100%", position: "relative", display: "flex", flexDirection: "column" }}
         >
             {/* Sovereign Cyan Left Bar */}
             <motion.div
@@ -59,54 +60,65 @@ export default function ListingCard({ listing, onBuy, accountAddress, currentUse
                 }}
             />
 
-            {/* Thumbnail */}
-            <motion.div className="card-thumb" variants={thumbVariants}>
-                {hasPhoto ? (
-                    <img
-                        src={listing.image}
-                        alt={listing.title}
-                        style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }}
-                    />
-                ) : (
-                    <span style={{ position: "relative", zIndex: 1 }}>{listing.image}</span>
-                )}
-                <motion.button
-                    className={`wishlist-btn${isWished ? " active" : ""}`}
-                    onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(listing.id); }}
-                    title={isWished ? "Remove from saved" : "Save listing"}
-                    whileTap={{ scale: 1.4 }}
-                    animate={isWished ? { scale: [1, 1.3, 1], transition: { duration: 0.3 } } : { scale: 1 }}
-                >
-                    {isWished ? "♥" : "♡"}
-                </motion.button>
-            </motion.div>
-
-            {/* Body */}
-            <motion.div className="card-body">
-                <motion.div
-                    className="card-category"
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1, duration: 0.3 }}
-                >{listing.category}</motion.div>
-                <div className="card-title">{listing.title}</div>
-                <div className="card-desc">{listing.description}</div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
-                    <Badge text={listing.condition} color={conditionColor[listing.condition] || "#8A7420"} />
-                    {listing.rating >= 4.0 && (
-                        <motion.span
-                            className="badge badge-gold"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.2 }}
-                        >⭐ TRUSTED</motion.span>
+            {/* Clickable area: Thumbnail + Body */}
+            <div
+                onClick={() => onView?.(listing)}
+                style={{ cursor: onView ? "pointer" : "default", flex: 1, display: "flex", flexDirection: "column" }}
+                role={onView ? "button" : undefined}
+                tabIndex={onView ? 0 : undefined}
+                onKeyDown={onView ? (e) => e.key === "Enter" && onView(listing) : undefined}
+                aria-label={onView ? `View details for ${listing.title}` : undefined}
+            >
+                {/* Thumbnail */}
+                <motion.div className="card-thumb" variants={thumbVariants}>
+                    {hasPhoto && !imgError ? (
+                        <img
+                            src={listing.image}
+                            alt={listing.title}
+                            onError={() => setImgError(true)}
+                            style={{ width: "100%", height: "100%", objectFit: "cover", position: "relative", zIndex: 1 }}
+                        />
+                    ) : (
+                        <span style={{ position: "relative", zIndex: 1, fontSize: 56 }}>📦</span>
                     )}
-                    <span style={{ marginLeft: "auto", fontFamily: "'Space Mono', monospace", fontSize: 9, color: "var(--text-dim)", letterSpacing: "0.06em" }}>
-                        {truncate(sellerAddress)}
-                    </span>
-                </div>
-            </motion.div>
+                    <motion.button
+                        className={`wishlist-btn${isWished ? " active" : ""}`}
+                        onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(listing.id); }}
+                        title={isWished ? "Remove from saved" : "Save listing"}
+                        whileTap={{ scale: 1.4 }}
+                        animate={isWished ? { scale: [1, 1.3, 1], transition: { duration: 0.3 } } : { scale: 1 }}
+                    >
+                        {isWished ? "♥" : "♡"}
+                    </motion.button>
+                </motion.div>
+
+                {/* Body */}
+                <motion.div className="card-body">
+                    <motion.div
+                        className="card-category"
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1, duration: 0.3 }}
+                    >{listing.category}</motion.div>
+                    <div className="card-title">{listing.title}</div>
+                    <div className="card-desc">{listing.description}</div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+                        <Badge text={listing.condition} color={conditionColor[listing.condition] || "#8A7420"} />
+                        {listing.rating >= 4.0 && (
+                            <motion.span
+                                className="badge badge-gold"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >⭐ TRUSTED</motion.span>
+                        )}
+                        <span style={{ marginLeft: "auto", fontFamily: "'Space Mono', monospace", fontSize: 9, color: "var(--text-dim)", letterSpacing: "0.06em" }}>
+                            {truncate(sellerAddress)}
+                        </span>
+                    </div>
+                </motion.div>
+            </div>
 
             {/* Footer */}
             <div className="card-footer">

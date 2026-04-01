@@ -26,6 +26,42 @@ function isUrlLike(value) {
     return v.startsWith("http://") || v.startsWith("https://") || v.startsWith("blob:") || v.startsWith("data:");
 }
 
+/** Compresses an image in the browser to ≤800px, JPEG 0.75 — reduces size aggressively for light base64 storage */
+async function compressImageFile(file, maxDim = 800, quality = 0.75) {
+    return new Promise((resolve) => {
+        const img = new window.Image();
+        const url = URL.createObjectURL(file);
+
+        img.onload = () => {
+            const w = img.naturalWidth;
+            const h = img.naturalHeight;
+            // Skip if already small enough
+            if (w <= maxDim && h <= maxDim && file.size < 250_000) {
+                URL.revokeObjectURL(url);
+                resolve(file);
+                return;
+            }
+            const scale = Math.min(1, maxDim / Math.max(w, h));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(w * scale);
+            canvas.height = Math.round(h * scale);
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            canvas.toBlob(
+                (blob) => {
+                    if (!blob) { resolve(file); return; }
+                    resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" }));
+                },
+                "image/jpeg",
+                quality
+            );
+        };
+
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+    });
+}
+
 export default function SellModal({ onClose, onList, accountAddress }) {
     const [form, setForm] = useState({ title: "", category: "Books", price: "", description: "", condition: "Good", image: "" });
     const [selectedImageFile, setSelectedImageFile] = useState(null);
@@ -37,6 +73,7 @@ export default function SellModal({ onClose, onList, accountAddress }) {
     const [analyzingImage, setAnalyzingImage] = useState(false);
     const [aiError, setAiError] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [submitStatus, setSubmitStatus] = useState("");
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -137,16 +174,28 @@ export default function SellModal({ onClose, onList, accountAddress }) {
         setError("");
 
         try {
+            // Step 1: compress the image in-browser before uploading
+            setSubmitStatus("COMPRESSING IMAGE...");
+            let photoFile = selectedImageFile;
+            try {
+                photoFile = await compressImageFile(selectedImageFile);
+            } catch {
+                // use original if compression unexpectedly fails
+            }
+
+            // Step 2: upload to Firebase Storage + write Firestore doc
+            setSubmitStatus("UPLOADING TO LEDGER...");
             await withTimeout(
-                onList({ ...form, price: parseFloat(form.price), sellerAddress: accountAddress, photoFile: selectedImageFile, image: imagePreviewUrl }),
-                15000,
-                "LISTING TIMEOUT. CHECK NETWORK STATE."
+                onList({ ...form, price: parseFloat(form.price), sellerAddress: accountAddress, photoFile, image: imagePreviewUrl }),
+                90000,
+                "UPLOAD TIMED OUT. CHECK YOUR NETWORK AND TRY AGAIN."
             );
             onClose();
         } catch (submitError) {
             setError(submitError?.message || "TRANSACTION FAILED. RETRY.");
         } finally {
             setSubmitting(false);
+            setSubmitStatus("");
         }
     };
 
@@ -262,7 +311,7 @@ export default function SellModal({ onClose, onList, accountAddress }) {
                     <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
                         <button onClick={onClose} disabled={submitting} className="btn-text-gold" style={{ flex: 1, fontSize: 11 }}>CANCEL</button>
                         <button onClick={handleSubmit} disabled={submitting} className="btn-gold" style={{ flex: 2, padding: "14px 0", fontSize: 11 }}>
-                            {submitting ? "SYNCING..." : "PUBLISH TO LEDGER →"}
+                            {submitting ? (submitStatus || "SYNCING...") : "PUBLISH TO LEDGER →"}
                         </button>
                     </div>
                 </div>

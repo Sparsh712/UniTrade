@@ -11,6 +11,7 @@ import ChatDrawer from "./components/ChatDrawer";
 import VerifyModal from "./components/VerifyModal";
 import MapModal from "./components/MapModal";
 import ReceiptModal from "./components/ReceiptModal";
+import ListingDetailModal from "./components/ListingDetailModal";
 import { useAuthUser } from "./hooks/useAuthUser";
 import { useListings } from "./hooks/useListings";
 import { useOrders } from "./hooks/useOrders";
@@ -90,6 +91,7 @@ export default function App() {
   const [chatListing, setChatListing] = useState(null);
   const [toast, setToast] = useState(null);
   const [receiptOrder, setReceiptOrder] = useState(null);
+  const [viewListing, setViewListing] = useState(null);
   
   // User Profile persistence
   const { profile, updateProfile } = useUserProfile(userId);
@@ -849,6 +851,7 @@ export default function App() {
                       onToggleWishlist={handleWishlistToggle}
                       onChat={setChatListing}
                       onDelete={handleDeleteListing}
+                      onView={setViewListing}
                     />
                   </div>
                 ))}
@@ -943,6 +946,7 @@ export default function App() {
                         onToggleWishlist={handleWishlistToggle}
                         onChat={setChatListing}
                         onDelete={handleDeleteListing}
+                        onView={setViewListing}
                       />
                     </div>
                   ))}
@@ -1024,7 +1028,7 @@ export default function App() {
                     <ListingCard listing={listing} accountAddress={accountAddress}
                       currentUserId={userId} onBuy={setCheckoutItem} wishlist={wishlistIds}
                       onToggleWishlist={handleWishlistToggle} onChat={setChatListing}
-                      onDelete={handleDeleteListing}
+                      onDelete={handleDeleteListing} onView={setViewListing}
                     />
                   </div>
                 ))}
@@ -1067,6 +1071,19 @@ export default function App() {
         )}
         {receiptOrder && (
           <ReceiptModal order={receiptOrder} onClose={() => setReceiptOrder(null)} />
+        )}
+        {viewListing && (
+          <ListingDetailModal
+            listing={viewListing}
+            accountAddress={accountAddress}
+            currentUserId={userId}
+            onClose={() => setViewListing(null)}
+            onBuy={setCheckoutItem}
+            onChat={setChatListing}
+            onDelete={handleDeleteListing}
+            wishlist={wishlistIds}
+            onToggleWishlist={handleWishlistToggle}
+          />
         )}
         {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       </AnimatePresence>

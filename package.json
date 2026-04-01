@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.46.0",
+    "@google/genai": "^1.48.0",
     "@perawallet/connect": "^1.5.1",
     "algosdk": "^3.5.2",
     "firebase": "^12.11.0",

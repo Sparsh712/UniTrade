@@ -354,23 +354,35 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
         )}
 
         {/* Listing preview slab */}
-        <div style={{ margin: "16px 20px 0", padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 16, borderRadius: "16px" }}>
-          <div style={{ width: 58, height: 58, borderRadius: 10, overflow: "hidden", background: "var(--s2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <div style={{ margin: "16px 20px 0", padding: "12px 16px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12, borderRadius: "12px", overflow: "hidden" }}>
+          <div style={{ width: 48, height: 48, borderRadius: 8, overflow: "hidden", background: "var(--s2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             {hasListingPhoto ? (
               <img src={listingImage} alt={listing.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              <span style={{ fontSize: 34 }}>{listing.image}</span>
+              <span style={{ fontSize: 26 }}>{listing.image}</span>
             )}
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{listing.title}</div>
-            <div style={{ fontSize: 12, color: "var(--gold)", fontFamily: "'Space Mono', monospace" }}>{listing.price} ALGO LISTED</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{listing.title}</div>
+            <div style={{ fontSize: 11, color: "var(--gold)", fontFamily: "'Space Mono', monospace" }}>{listing.price} ALGO</div>
           </div>
           {!isSeller && (
             <button
               onClick={handleBuyAtListedPrice}
-              className="btn-gold"
-              style={{ padding: "10px 16px", fontSize: 11 }}
+              style={{
+                flexShrink: 0,
+                background: "var(--gold)",
+                color: "#000",
+                border: "none",
+                padding: "8px 14px",
+                fontSize: 11,
+                fontFamily: "'Space Mono', monospace",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                borderRadius: 6,
+              }}
             >
               BUY NOW
             </button>
@@ -385,11 +397,20 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
 
         {/* Seller tools */}
         {canSendOffer && (
-          <div style={{ display: "flex", gap: 12, padding: "16px 24px 0" }}>
+          <div style={{ display: "flex", gap: 12, padding: "12px 20px 0" }}>
             <button
               onClick={() => setShowOfferComposer((prev) => !prev)}
-              className="btn-outline"
-              style={{ fontSize: 10, padding: "6px 14px", background: showOfferComposer ? "var(--s1)" : "transparent" }}
+              style={{
+                fontSize: 10,
+                padding: "6px 14px",
+                background: showOfferComposer ? "rgba(255,255,255,0.07)" : "transparent",
+                border: "1px solid var(--border-gold)",
+                color: "var(--gold)",
+                fontFamily: "'Space Mono', monospace",
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                borderRadius: 6,
+              }}
             >
               🏷️ SEND CUSTOM OFFER
             </button>
@@ -397,8 +418,8 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
         )}
 
         {showOfferComposer && canSendOffer && (
-          <div style={{ margin: "12px 20px 0", padding: "16px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--gold-dim)", display: "flex", gap: 12, alignItems: "center", borderRadius: "16px" }}>
-            <span style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Space Mono', monospace" }}>OFFER ALGO</span>
+          <div style={{ margin: "10px 20px 0", padding: "12px 14px", background: "rgba(255,255,255,0.04)", border: "1px solid var(--gold-dim)", display: "flex", gap: 10, alignItems: "center", borderRadius: "10px", overflow: "hidden" }}>
+            <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Space Mono', monospace", flexShrink: 0 }}>ALGO</span>
             <input
               type="number"
               step="0.01"
@@ -406,14 +427,25 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
               value={offerPrice}
               onChange={(event) => setOfferPrice(event.target.value)}
               onKeyDown={(event) => event.key === "Enter" && sendOffer()}
-              placeholder="PRICE"
+              placeholder="OFFER PRICE"
               className="input-box"
-              style={{ flex: 1, padding: "10px 14px", fontSize: 13, fontFamily: "'Space Mono', monospace" }}
+              style={{ flex: 1, padding: "9px 12px", fontSize: 13, fontFamily: "'Space Mono', monospace" }}
             />
             <button
               onClick={sendOffer}
-              className="btn-gold"
-              style={{ padding: "10px 20px", fontSize: 11 }}
+              style={{
+                flexShrink: 0,
+                background: "var(--gold)",
+                color: "#000",
+                border: "none",
+                padding: "9px 16px",
+                fontSize: 11,
+                fontFamily: "'Space Mono', monospace",
+                fontWeight: 700,
+                cursor: "pointer",
+                borderRadius: 6,
+                letterSpacing: "0.08em",
+              }}
             >
               SEND
             </button>
@@ -435,7 +467,7 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
         </div>
 
         {/* Input area */}
-        <div style={{ padding: "20px 24px", borderTop: "1px solid var(--border)", display: "flex", gap: 12, background: "rgba(13, 13, 28, 0.7)" }}>
+        <div style={{ padding: "12px 16px", borderTop: "1px solid var(--border)", display: "flex", gap: 10, background: "rgba(13, 13, 28, 0.85)", alignItems: "center", flexShrink: 0 }}>
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -443,13 +475,26 @@ export default function ChatDrawer({ listing, currentUserId, onClose, onBuy, onO
             placeholder="TYPE A MESSAGE..."
             disabled={!chatId}
             className="input-box"
-            style={{ flex: 1, padding: "12px 16px" }}
+            style={{ flex: 1, padding: "11px 14px", fontSize: 13 }}
           />
           <button
             onClick={sendText}
             disabled={!chatId}
-            className="btn-gold"
-            style={{ width: 50, height: 44, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}
+            style={{
+              flexShrink: 0,
+              width: 44,
+              height: 44,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 18,
+              background: chatId ? "var(--gold)" : "var(--s3)",
+              color: chatId ? "#000" : "var(--text-dim)",
+              border: "none",
+              borderRadius: 8,
+              cursor: chatId ? "pointer" : "not-allowed",
+              transition: "background 0.2s",
+            }}
           >
             ➤
           </button>

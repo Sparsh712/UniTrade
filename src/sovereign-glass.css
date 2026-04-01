@@ -225,3 +225,17 @@ body {
   color: var(--pulse) !important;
   font-weight: 600 !important;
 }
+
+/* ── CHAT DRAWER PANEL (Glass Theme Override) ── */
+.chat-drawer-panel {
+  background: rgba(10, 15, 30, 0.92) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border-left: 1px solid rgba(0, 242, 254, 0.15) !important;
+  box-shadow: -8px 0 48px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* ── LISTING DETAIL MODAL OVERRIDES ── */
+.modal-panel img {
+  display: block;
+}
