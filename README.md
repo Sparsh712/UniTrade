@@ -114,7 +114,4 @@ See [package.json](package.json) for exact script definitions.
 4. If wallet actions fail, reconnect Pera wallet and verify TestNet balance
 5. If AI analyze fails, ensure GEMINI_API_KEY is configured
 
-## Additional Docs
-- Full implementation report: [PROJECT_REPORT.md](PROJECT_REPORT.md)
-
-Built for trusted campus trading on Algorand TestNet.
+Built by Team Vectôr.
